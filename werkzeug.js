@@ -165,6 +165,10 @@ function format_transpose(input) {
   return output
 }
 
+function format_sort(input) {
+  return input.split("\n").sort().join("\n")
+}
+
 function format() {
   input = document.getElementById("input").value
   
@@ -201,6 +205,9 @@ function format() {
       break;
     case "transpose":
       output = format_transpose(input)
+      break;
+    case "sort":
+      output = format_sort(input)
       break;
   }
 
