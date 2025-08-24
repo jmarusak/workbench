@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Editor</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; }
+  #editor { width: 100%; height: 400px; font-size: 16px; }
+  #suggestions {
+    border: 1px solid #ccc;
+    max-width: 300px;
+    background: white;
+    position: absolute;
+    display: none;
+    z-index: 1000;
+  }
+  #suggestions div {
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  #suggestions div.active {
+    background: #cce5ff;
+  }
+</style>
+</head>
+<body>
+
+<label>Suggestions:
+  <input type="file" id="fileInput" accept=".txt">
+</label>
+<br><br>
+
+<textarea id="editor" placeholder="Start typing..."></textarea>
+<div id="suggestions"></div>
+
+<script>
+let dictionary = [];
+const editor = document.getElementById("editor");
+const sugBox = document.getElementById("suggestions");
+let activeIndex = -1; // highlighted suggestion
+
+// Load dictionary from chosen file
+document.getElementById("fileInput").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    dictionary = evt.target.result
+      .split(/\r?\n/)
+      .map(w => w.trim())
+      .filter(Boolean);
+    alert("Dictionary loaded with " + dictionary.length + " words.");
+  };
+  reader.readAsText(file);
+});
+
+// Show suggestions while typing
+editor.addEventListener("input", () => {
+  const cursorPos = editor.selectionStart;
+  const textBefore = editor.value.substring(0, cursorPos);
+  const currentWord = textBefore.split(/\s+/).pop();
+
+  if (!currentWord) {
+    sugBox.style.display = "none";
+    return;
+  }
+
+  const matches = dictionary.filter(w =>
+    w.toLowerCase().startsWith(currentWord.toLowerCase())
+  );
+
+  if (matches.length === 0) {
+    sugBox.style.display = "none";
+    return;
+  }
+
+  sugBox.innerHTML = matches.slice(0, 5).map((m,i) => 
+    `<div data-index="${i}">${m}</div>`).join("");
+  sugBox.style.display = "block";
+  activeIndex = -1; // reset selection
+
+  // Position suggestions just under the editor
+  const rect = editor.getBoundingClientRect();
+  sugBox.style.left = rect.left + "px";
+  sugBox.style.top = (rect.bottom + window.scrollY) + "px";
+
+  [...sugBox.children].forEach(child => {
+    child.addEventListener("click", () => {
+      insertSuggestion(child.textContent, currentWord);
+    });
+  });
+});
+
+// Keyboard navigation for suggestions
+editor.addEventListener("keydown", (e) => {
+  if (sugBox.style.display === "none") return;
+
+  const items = [...sugBox.children];
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    activeIndex = (activeIndex + 1) % items.length;
+    updateActive(items);
+  }
+  else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    activeIndex = (activeIndex - 1 + items.length) % items.length;
+    updateActive(items);
+  }
+  else if (e.key === "Enter") {
+    if (activeIndex >= 0) {
+      e.preventDefault();
+      const currentWord = getCurrentWord();
+      insertSuggestion(items[activeIndex].textContent, currentWord);
+    }
+  }
+  else if (e.key === "Escape") {
+    sugBox.style.display = "none";
+  }
+});
+
+function updateActive(items) {
+  items.forEach(i => i.classList.remove("active"));
+  if (activeIndex >= 0) {
+    items[activeIndex].classList.add("active");
+  }
+}
+
+// Helper: get the word being typed at cursor
+function getCurrentWord() {
+  const cursorPos = editor.selectionStart;
+  const textBefore = editor.value.substring(0, cursorPos);
+  return textBefore.split(/\s+/).pop();
+}
+
+// Replace current word with suggestion
+function insertSuggestion(word, currentWord) {
+  const start = editor.selectionStart - currentWord.length;
+  const end = editor.selectionStart;
+  editor.setRangeText(word + " ", start, end, "end");
+  sugBox.style.display = "none";
+  activeIndex = -1;
+}
+</script>
+</body>
+</html>

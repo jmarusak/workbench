@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Clipboard</title>
+  <style>
+    body {
+      font-family: monospace;
+      margin: 20px;
+      font-size: 14px;
+    }
+    button {
+      font-family: inherit;
+      font-size: inherit;
+      margin: 5px;
+      padding: 8px 12px;
+      background: #add8e6;
+      border: 1px solid #555;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #87ceeb;
+    }
+    .clipboard-row {
+      display: block;
+      margin: 10px 0;
+    }
+    .clipboard-row textarea {
+      font-family: inherit;
+      font-size: inherit;
+      width: 1000px;
+      height: 100px; /* Set a default height */
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      resize: vertical; /* Allow vertical resizing */
+    }
+    .selected {
+      border: 2px solid blue;
+    }
+  </style>
+</head>
+<body>
+  <button id="pasteBtn">Paste</button>
+  <button id="copyBtn">Copy</button>
+  <button id="loadBtn">Load</button>
+  <button id="deleteBtn">Delete</button>
+
+  <div id="clipboardTable"></div>
+
+  <script>
+    const pasteBtn = document.getElementById('pasteBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const loadBtn = document.getElementById('loadBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const clipboardTable = document.getElementById('clipboardTable');
+
+    let selectedRow = null;
+
+    // Helper to create a new row
+    function createRow(text) {
+      const row = document.createElement('div');
+      row.className = 'clipboard-row';
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+
+      // Row selection
+      textarea.addEventListener('click', () => {
+        if (selectedRow) selectedRow.querySelector('textarea').classList.remove('selected');
+        selectedRow = row;
+        textarea.classList.add('selected');
+      });
+
+      row.appendChild(textarea);
+      clipboardTable.insertBefore(row, clipboardTable.firstChild);
+    }
+
+    // Paste button
+    pasteBtn.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) createRow(text);
+      } catch (err) {
+        alert('Clipboard access denied');
+      }
+    });
+
+    // Copy button
+    copyBtn.addEventListener('click', async () => {
+      if (!selectedRow) {
+        alert('Please select a row first.');
+        return;
+      }
+      const text = selectedRow.querySelector('textarea').value;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (err) {
+        alert('Failed to copy to clipboard');
+      }
+    });
+
+    // Delete button
+    deleteBtn.addEventListener('click', () => {
+      if (!selectedRow) {
+        alert('Please select a row first.');
+        return;
+      }
+      selectedRow.remove();
+      selectedRow = null;
+    });
+
+    // Load button
+    loadBtn.addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.sql,.txt'; // Suggest file types for SQL or plain text
+
+      input.onchange = e => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = event => {
+            const content = event.target.result;
+            const items = content.split(';');
+            items.forEach(item => {
+              const trimmedItem = item.trim();
+              if (trimmedItem) {
+                createRow(trimmedItem);
+              }
+            });
+          };
+          reader.readAsText(file);
+        }
+      };
+      input.click(); // Trigger the file input click
+    });
+  </script>
+</body>
+</html>

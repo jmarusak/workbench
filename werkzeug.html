@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+<body>
+
+<script src="werkzeug.js"></script>
+
+<input type="radio" id="bq" name="format" value="bq" checked="checked">
+<label for="html">BQ Output</label><br>
+<input type="radio" id="stmt" name="format" value="code">
+<label for="css">Code Reformat</label><br>
+<input type="radio" id="sql" name="format" value="sql">
+<label for="css">SQL Select</label><br>
+<input type="radio" id="lowecase" name="format" value="lowercase">
+<label for="css">To Lowercase</label><br>
+<input type="radio" id="uppercase" name="format" value="uppercase">
+<label for="css">To Uppercase</label><br>
+<input type="radio" id="json" name="format" value="json">
+<label for="css">To JSON Schema</label><br>
+<input type="radio" id="list" name="format" value="list">
+<label for="css">To List</label><br>
+<input type="radio" id="transpose" name="format" value="transpose">
+<label for="css">Transpose</label><br><br>
+
+<div>
+<button type="button" onclick="format()">Format</button>
+<button type="button" onclick="copy()">Copy</button>
+<button type="button" onclick="copy_html()">Copy HTML</button>
+<button type="button" onclick="copy_markdown()">Copy Markdown</button>
+</div><br>
+
+<textarea id="input" name="input" rows="20" cols="100"></textarea>
+<textarea id="output" name="output" rows="20" cols="100"></textarea>
+
+</body>
+</html>
