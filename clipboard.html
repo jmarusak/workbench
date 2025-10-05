@@ -30,7 +30,7 @@
       font-family: inherit;
       font-size: inherit;
       width: 1000px;
-      height: 100px; /* Set a default height */
+      height: auto; /* Set a default height */
       padding: 6px;
       border-radius: 8px;
       border: 1px solid #333;
@@ -58,12 +58,20 @@
 
     let selectedRow = null;
 
+    // Helper to auto-resize textarea
+    function autoResize(textarea) {
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
     // Helper to create a new row
     function createRow(text) {
       const row = document.createElement('div');
       row.className = 'clipboard-row';
       const textarea = document.createElement('textarea');
       textarea.value = text;
+
+      // Auto-resize on input
+      textarea.addEventListener('input', () => autoResize(textarea));
 
       // Row selection
       textarea.addEventListener('click', () => {
@@ -74,6 +82,9 @@
 
       row.appendChild(textarea);
       clipboardTable.insertBefore(row, clipboardTable.firstChild);
+     
+      // Auto-resize on insert
+      autoResize(textarea);
     }
 
     // Paste button
