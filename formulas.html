@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Formula Evaluator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 600px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    label {
+      width: 60px;
+    }
+    input {
+      padding: 6px;
+      font-size: 16px;
+      margin-right: 10px;
+      flex: 1;
+    }
+    button {
+      padding: 6px 12px;
+      font-size: 16px;
+      background-color: #7dbdf3;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #5aa8e5;
+    }
+  </style>
+</head>
+<body>
+  <h2>Formula Evaluator</h2>
+
+  <div class="row">
+    <label>A</label>
+    <input id="A">
+  </div>
+
+  <div class="row">
+    <label>B</label>
+    <input id="B">
+  </div>
+
+  <div class="row">
+    <label>C</label>
+    <input id="C">
+  </div>
+
+  <div class="row">
+    <label>Formula</label>
+    <input id="formula" placeholder='e.g. A.toUpperCase() or `${A}  ${B}`'>
+    <button id="evalBtn">Eval</button>
+  </div>
+
+  <div class="row">
+    <label>Result</label>
+    <input id="result">
+  </div>
+
+  <div>
+    <br><strong>Note:</strong> You can use A, B, and C in your formula (javascript expression). For example:
+    <ul>
+      <li><code>A.toUpperCase()</code></li>
+      <li><code>B + C</code></li>
+      <li><code>`Hello ${A} ${B}`</code></li>
+      <li><code>"`" + `${A}` + "`" </code></li>
+    </ul>
+
+  </div>
+
+  <script>
+    document.getElementById("evalBtn").addEventListener("click", () => {
+      const A = document.getElementById("A").value;
+      const B = document.getElementById("B").value;
+      const C = document.getElementById("C").value;
+      const formula = document.getElementById("formula").value;
+
+      try {
+        // Create a dynamic function that evaluates the formula
+        const fn = new Function("A", "B", "C", `return ${formula};`);
+        const result = fn(A, B, C);
+        document.getElementById("result").value = result;
+      } catch (e) {
+        document.getElementById("result").value = "Error: " + e.message;
+      }
+    });
+  </script>
+</body>
+</html>
